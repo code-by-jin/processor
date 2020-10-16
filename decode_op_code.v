@@ -11,3 +11,4 @@ module decode_op_code (is_alu, is_addi, is_sw, is_lw, opcode);
 	assign is_lw   = (~opcode[4]) & (opcode[3])  & (~opcode[2]) & (~opcode[1]) & (~opcode[0]); //01000
 	
 	
+endmodule
