@@ -91,35 +91,53 @@ module processor(
     input [31:0] data_readRegA, data_readRegB;
 
     /* YOUR CODE STARTS HERE */
-	 
 	 wire [31:0] pc_in, pc_out;
 	 
+	 /*Fetch*/
 	 // use pc as a register
-	 register_32bits pc (pc_next, pc_in, clock, 1'b1, reset); 
+	 register_32bits pc (pc_next, pc_in, clock, 1'b1, reset); //reg pc;
 	 
+	 // adder add_0 (pc_out, pc_in, 4) // 4 or 1
+	 /*each pc clock: address_imem = address_imem + 12'd4*/
 	 
-	 
-	 assign address_imem = pc[11:0];
+	 assign address_imem = pc[11:0];  //+4
 	 
 	 
 	 
 	 // first option for next pc
 	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 // adder add_0 (pc_out, pc_in, 4) // 4 or 1
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
+
+	 /*random logic: control signals*/
+	wire is_alu, is_addi, is_sw, is_lw;
+	wire DMwe, Rwe, Rwd, ALUinB, Rdst, ALUop;
+	decode_op_code (is_alu, is_addi, is_sw, is_lw, q_imem[31:27]);
+	Rwe = xor(is_alu, is_addi, is_lw);	// control regfile write
+	ALUinB = xor(is_addi, is_lw, is_sw);
+	// Rdst = not is_alu;
+	// DMwe = is_sw, data memory write enable
+	// Rwd = is_lw, read word enable
+	
+	/*only add addi part*/
+	wire [4:0] rd, rs, rt, shamt, ctrl_aluop;
+	wire [31:0] dst, data_write, data_readA, data_readB, data_operandB;
+	wire [16:0] immed;
+	rd = q_imem[26:22]; //ctrl writereg
+	rs = q_imem[21:17];
+	rt = q_imem[16:12];
+	shamt = q_imem[11:7];
+	immed = q_imem[16:0];
+	
+	assign ctrl_aluop = is_alu ? q_imem[6:2] : 5'd0; // 1:alu, 0:addition 
+	
+*	sx_immed //SX: sign extesion part
+	
+	regfile(1, 0, reset, rd, rs, rt, data_write, data_readA, data_readB); //read two data from regfile
+	assign data_operandB = ALUinB ? sx_immed: data_readB;		// mux to choose add operand
+	alu(data_readA, data_operandB, ctrl_aluop, shamt, 
+			data_result, isNotEqual, isLessThan, overflow);
+		
+*
+		
+	regfile(1, Rwe, reset, rd, rs, rt, data_result, data_readA, data_readB);
 
 endmodule
