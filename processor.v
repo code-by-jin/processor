@@ -117,27 +117,34 @@ module processor(
 	// DMwe = is_sw, data memory write enable
 	// Rwd = is_lw, read word enable
 	
-	/*only add addi part*/
 	wire [4:0] rd, rs, rt, shamt, ctrl_aluop;
 	wire [31:0] dst, data_write, data_readA, data_readB, data_operandB;
 	wire [16:0] immed;
-	rd = q_imem[26:22]; //ctrl writereg
-	rs = q_imem[21:17];
-	rt = q_imem[16:12];
 	shamt = q_imem[11:7];
 	immed = q_imem[16:0];
 	
 	assign ctrl_aluop = is_alu ? q_imem[6:2] : 5'd0; // 1:alu, 0:addition 
 	
 *	sx_immed //SX: sign extesion part
+
+	/*Regfile set when read*/
+	ctrl_writeEnable = 0;
+	ctrl_writeReg = q_imem[26:22]; // =rd
+	ctrl_readRegA = q_imem[21:17]; // =rs
+	ctrl_readRegB = q_imem[16:12]; // =rt
 	
-	regfile(1, 0, reset, rd, rs, rt, data_write, data_readA, data_readB); //read two data from regfile
-	assign data_operandB = ALUinB ? sx_immed: data_readB;		// mux to choose add operand
-	alu(data_readA, data_operandB, ctrl_aluop, shamt, 
+	/*alu*/
+	assign data_operandB = ALUinB ? sx_immed: data_readRegB;		// mux to choose add operand	
+	alu(data_readRegA, data_operandB, ctrl_aluop, shamt, 
 			data_result, isNotEqual, isLessThan, overflow);
-		
-*
-		
-	regfile(1, Rwe, reset, rd, rs, rt, data_result, data_readA, data_readB);
+	
+	/*dmem set*/
+	address_dmem = data_result[11:0];	//dataresult(address) output to dmem
+	data = data_readRegB
+	wren = is_lw ? 0 : 1;
+	
+	/*Regfile set when wirte*/
+	data_writeReg = is_lw ? q_dmem : data_result; //mux 1:lw,choose data from d_mem, 0: alu result
+	ctrl_writeEnable = Rwe;
 
 endmodule
