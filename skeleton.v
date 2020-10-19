@@ -9,7 +9,8 @@
  * inspect which signals the processor tries to assert when.
  */
 
-module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock);
+module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock, 
+					data_readRegA, data_readRegB, address_imem, address_dmem);
     input clock, reset;
     /* 
         Create four clocks for each module from the original input "clock".
@@ -19,6 +20,17 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
         based on proper functioning with this clock.
     */
     output imem_clock, dmem_clock, processor_clock, regfile_clock;
+	 
+	 
+	 /*Test*/
+	 output [31:0] data_readRegA, data_readRegB;
+	 output [11:0] address_imem, address_dmem;
+	 
+	 
+	 assign imem_clock = clock; //
+	 clk_div_2 div_2 (dmem_clock, clock, 1'b0);
+	 clk_div_2 div_4 (processor_clock, dmem_clock, 1'b0);
+	 assign regfile_clock = processor_clock; // div by 4
 
     /** IMEM **/
     // Figure out how to generate a Quartus syncram component and commit the generated verilog file.
@@ -39,11 +51,11 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
     wire wren;
     wire [31:0] q_dmem;
     dmem my_dmem(
-        .address    (/* 12-bit wire */),       // address of data
+        .address    (address_dmem),       // address of data
         .clock      (dmem_clock),                  // may need to invert the clock
-        .data	    (/* 32-bit data in */),    // data you want to write
-        .wren	    (/* 1-bit signal */),      // write enable
-        .q          (/* 32-bit data out */)    // data from dmem
+        .data	    (data),    // data you want to write
+        .wren	    (wren),      // write enable
+        .q          (q_dmem)    // data from dmem
     );
 
     /** REGFILE **/
