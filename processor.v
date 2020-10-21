@@ -140,6 +140,6 @@ module processor(
 	assign data_writeReg = Rwd ? q_dmem : data_result; //output, if Rwd(is_lw): q_dmem; else: data_result(alu_output)
 	
 	//Next Instruction
-	alu pc_add_4 (pc, 32'h00000001, 5'b00000, 5'b00000, pc_next, isNotEqual_pc, isLessThan_pc, overflow_pc); // pc -> pc_next
+	alu pc_add_4 (pc, 32'd1, 5'b00000, 5'b00000, pc_next, isNotEqual_pc, isLessThan_pc, overflow_pc); // pc -> pc_next
 
 endmodule

@@ -9,8 +9,11 @@
  * inspect which signals the processor tries to assert when.
  */
 
-module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock, 
-					data_readRegA, data_readRegB, address_imem, address_dmem);
+module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock,
+address_imem, q_imem, address_dmem, data, wren, q_dmem, ctrl_writeEnable, ctrl_writeReg,
+ctrl_readRegA, ctrl_readRegB, data_writeReg, data_readRegA, data_readRegB,
+//modified
+reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg31);
     input clock, reset;
     /* 
         Create four clocks for each module from the original input "clock".
@@ -20,23 +23,27 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
         based on proper functioning with this clock.
     */
     output imem_clock, dmem_clock, processor_clock, regfile_clock;
-	 
+
 	 
 	 /*Test*/
-	 output [31:0] data_readRegA, data_readRegB;
-	 output [11:0] address_imem, address_dmem;
+	 
+	 wire clk_div_by_2, clk_div_by_4;
 	 
 	 
-	 assign imem_clock = clock; //
-	 clk_div_2 div_2 (dmem_clock, clock, 1'b0);
-	 clk_div_2 div_4 (processor_clock, dmem_clock, 1'b0);
-	 assign regfile_clock = processor_clock; // div by 4
+	 clk_div_2 div_2 (clk_div_by_2, clock, reset);
+	 clk_div_2 div_4 (clk_div_by_4, clk_div_by_2, reset);
+	 
+	 assign imem_clock = clock;
+	 assign dmem_clock = ~clk_div_by_2;
 
+	 assign regfile_clock = clk_div_by_4;
+	 assign processor_clock = clk_div_by_4;
+	 
     /** IMEM **/
     // Figure out how to generate a Quartus syncram component and commit the generated verilog file.
     // Make sure you configure it correctly!
-    wire [11:0] address_imem;
-    wire [31:0] q_imem;
+    output wire [11:0] address_imem;
+    output wire [31:0] q_imem;
     imem my_imem(
         .address    (address_imem),            // address of data
         .clock      (imem_clock),                  // you may need to invert the clock
@@ -46,10 +53,10 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
     /** DMEM **/
     // Figure out how to generate a Quartus syncram component and commit the generated verilog file.
     // Make sure you configure it correctly!
-    wire [11:0] address_dmem;
-    wire [31:0] data;
-    wire wren;
-    wire [31:0] q_dmem;
+    output wire [11:0] address_dmem;
+    output wire [31:0] data;
+    output wire wren;
+    output wire [31:0] q_dmem;
     dmem my_dmem(
         .address    (address_dmem),       // address of data
         .clock      (dmem_clock),                  // may need to invert the clock
@@ -60,10 +67,12 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
 
     /** REGFILE **/
     // Instantiate your regfile
-    wire ctrl_writeEnable;
-    wire [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
-    wire [31:0] data_writeReg;
-    wire [31:0] data_readRegA, data_readRegB;
+    output wire ctrl_writeEnable;
+    output wire [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
+    output wire [31:0] data_writeReg;
+    output wire [31:0] data_readRegA, data_readRegB;
+	 output wire[31:0] reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg31;
+	 
     regfile my_regfile(
         regfile_clock,
         ctrl_writeEnable,
@@ -73,7 +82,9 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
         ctrl_readRegB,
         data_writeReg,
         data_readRegA,
-        data_readRegB
+        data_readRegB,
+		  reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg31 // for test only
+
     );
 
     /** PROCESSOR **/

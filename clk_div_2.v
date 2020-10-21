@@ -2,7 +2,6 @@ module clk_div_2 (clk_out, clk, clr);
 	output reg clk_out;
 	input clk, clr;  
    
-   //Register
 
    always @(posedge clk or posedge clr) begin
        //If clear is high, set q to 0
