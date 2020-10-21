@@ -26,8 +26,8 @@ module regfile(
 				registers[ctrl_writeReg] = data_writeReg;
 	end
 	
-	assign data_readRegA = ctrl_writeEnable && (ctrl_writeReg == ctrl_readRegA) ? 32'bz : registers[ctrl_readRegA];
-	assign data_readRegB = ctrl_writeEnable && (ctrl_writeReg == ctrl_readRegB) ? 32'bz : registers[ctrl_readRegB];
+	assign data_readRegA = registers[ctrl_readRegA];
+	assign data_readRegB = registers[ctrl_readRegB];
 	
 	
 	output [31:0] reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg31;
