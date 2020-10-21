@@ -71,28 +71,26 @@ module processor(
     data_readRegA,                  // I: Data from port A of regfile
     data_readRegB                   // I: Data from port B of regfile
 );
+    // Control signals
+    input clock, reset;
 
-	// Control signals
-	input clock, reset;
+    // Imem
+    output [11:0] address_imem;
+    input [31:0] q_imem;
 
-   // Imem
-   output [11:0] address_imem;
-   input [31:0] q_imem;
+    // Dmem
+    output [11:0] address_dmem;
+    output [31:0] data;
+    output wren;
+    input [31:0] q_dmem;
 
-   // Dmem
-   output [11:0] address_dmem;
-   output [31:0] data;
-   output wren;
-   input [31:0] q_dmem;
+    // Regfile
+    output ctrl_writeEnable;
+    output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
+    output [31:0] data_writeReg;
+    input [31:0] data_readRegA, data_readRegB;
 
-   // Regfile
-   output ctrl_writeEnable;
-   output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
-   output [31:0] data_writeReg;
-   input [31:0] data_readRegA, data_readRegB;
-
-   /* YOUR CODE STARTS HERE */
-	
+    /* YOUR CODE STARTS HERE */
 	/*random logic: control signals*/
 	wire [31:0] pc, pc_next;
 	wire is_alu, is_addi, is_sw, is_lw;
@@ -107,14 +105,14 @@ module processor(
 	assign address_imem = pc[11:0];  //output
 	
 	//Instruction Decode
-	decode_op_code decode_op (is_alu, is_addi, is_sw, is_lw, DMwe, Rwe, Rwd, Rdst, ALUinB, q_imem[31:27]);
+	decode_op_code decode_op (is_alu, is_addi, is_sw, is_lw, DMwe, Rwe, Rwd, ALUinB, q_imem[31:27]);
 	
 	assign ALU_op = is_alu ? q_imem[6:2] : 5'd0; // alu if 1
 	assign shamt  = is_alu ? q_imem[11:7] : 5'd0;  // alu if 1
  	
 	assign rt = is_alu ? q_imem[16:12] : 5'd0;
 	assign rs = q_imem[21:17];
-	assign rd = Rdst? q_imem[26:22] : q_imem[16:12];
+	assign rd = q_imem[26:22];
 	
 	//Operand Fetch
 	/*SX: sign extesion part*/
@@ -125,21 +123,22 @@ module processor(
 	/*alu*/
 	assign data_operandB = ALUinB ? sx_immed: data_readRegB;		// mux to choose add operand	
 	alu alu_op (data_readRegA, data_operandB, ALU_op, shamt, data_result, isNotEqual, isLessThan, overflow);
+	
 
 	// Result Store
 	/*dmem*/
 	assign address_dmem = data_result[11:0];	//dataresult(address) output to dmem
 	assign data = data_readRegB; // output
 	assign wren = DMwe; // output, when is_sw
-		
+			
 	/*Regfile*/
-	assign ctrl_writeEnable = Rwe; //output
+	assign ctrl_writeEnable = Rwe && clock; //output
 	assign ctrl_readRegA = rs; //output
 	assign ctrl_readRegB = rt; //output	
 	assign ctrl_writeReg = rd; //output
 	assign data_writeReg = Rwd ? q_dmem : data_result; //output, if Rwd(is_lw): q_dmem; else: data_result(alu_output)
-	
+		
 	//Next Instruction
-	alu pc_add_4 (pc, 32'd1, 5'b00000, 5'b00000, pc_next, isNotEqual_pc, isLessThan_pc, overflow_pc); // pc -> pc_next
-
+	alu (pc, 32'd1, 5'b00000, 5'b00000, pc_next, isNotEqual_pc, isLessThan_pc, overflow_pc); // pc -> pc_next
+	
 endmodule

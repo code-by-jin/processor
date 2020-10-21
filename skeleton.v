@@ -36,7 +36,7 @@ reg1, reg2, reg3, reg4, reg5, reg6, reg7, reg31);
 	 assign imem_clock = clock;
 	 assign dmem_clock = ~clk_div_by_2;
 
-	 assign regfile_clock = clk_div_by_4;
+	 assign regfile_clock = ~clk_div_by_2;
 	 assign processor_clock = clk_div_by_4;
 	 
     /** IMEM **/
