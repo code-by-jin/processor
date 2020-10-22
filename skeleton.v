@@ -13,8 +13,7 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
 address_imem, q_imem, address_dmem, data, wren, q_dmem, ctrl_writeEnable, ctrl_writeReg,
 ctrl_readRegA, ctrl_readRegB, data_writeReg, data_readRegA, data_readRegB,
 //modified
-reg1, reg4, reg19, reg20, reg27, reg28, reg29, reg31 // for test only// test only
-);
+reg1, reg4, reg19, reg20, reg27, reg28, reg29); //test
     input clock, reset;
     /* 
         Create four clocks for each module from the original input "clock".
@@ -34,12 +33,11 @@ reg1, reg4, reg19, reg20, reg27, reg28, reg29, reg31 // for test only// test onl
 	 clk_div_2 div_2 (clk_div_by_2, clock, reset);
 	 clk_div_2 div_4 (clk_div_by_4, clk_div_by_2, reset);
 	 
-	 
 	 assign imem_clock = clock;
-	 assign dmem_clock =  clk_div_by_2;
+	 assign dmem_clock = clock;
 
-	 assign regfile_clock = ~clk_div_by_4;
-	 assign processor_clock = ~clk_div_by_4;
+	 assign regfile_clock = ~clk_div_by_2;
+	 assign processor_clock = clk_div_by_4;
 	 
     /** IMEM **/
     // Figure out how to generate a Quartus syncram component and commit the generated verilog file.
@@ -73,7 +71,7 @@ reg1, reg4, reg19, reg20, reg27, reg28, reg29, reg31 // for test only// test onl
     output wire [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
     output wire [31:0] data_writeReg;
     output wire [31:0] data_readRegA, data_readRegB;
-	 output wire[31:0] reg1, reg4, reg19, reg20, reg27, reg28, reg29, reg31; // for test only
+	 output wire[31:0] reg1, reg4, reg19, reg20, reg27, reg28, reg29; //test
 	 
     regfile my_regfile(
         regfile_clock,
@@ -85,7 +83,7 @@ reg1, reg4, reg19, reg20, reg27, reg28, reg29, reg31 // for test only// test onl
         data_writeReg,
         data_readRegA,
         data_readRegB,
-		  reg1, reg4, reg19, reg20, reg27, reg28, reg29, reg31 // for test only
+		  reg1, reg4, reg19, reg20, reg27, reg28, reg29  // for test only
 
     );
 
