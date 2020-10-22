@@ -96,7 +96,7 @@ module processor(
 	wire is_alu, is_addi, is_sw, is_lw, is_ovf;
 	wire DMwe, Rwe, Rwd, Rdst, ALUinB;
 	wire [4:0] rd, rs, rt, shamt, ALU_op;
-	wire [31:0] data_operandB, sx_immed, data_result;
+	wire [31:0] data_operandB, sx_immed, data_result, ovf_label;
 	wire isNotEqual, isLessThan, overflow, isNotEqual_pc, isLessThan_pc, overflow_pc;
 	
 	//Instruction Fetch
