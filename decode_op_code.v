@@ -12,7 +12,6 @@ module decode_op_code (is_alu, is_addi, is_sw, is_lw, DMwe, Rwe, Rwd, ALUinB, op
 	assign DMwe = is_sw;
 	assign Rwe  = is_alu | is_addi | is_lw;
 	assign Rwd  = is_lw;
-	assign Rdst = ~is_alu;
 	assign ALUinB = is_addi | is_sw | is_lw;
 	
 endmodule
