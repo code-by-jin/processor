@@ -18,10 +18,15 @@ sw $10, 1($0)		# store 345 into address 1
 sw $11, 2($0)		# store 567 into address 2
 lw $12, 1($0)		# load 345 into r12
 lw $13, 2($0)		# load 567 into r13
- 
-addi $14, $0, 2147483648     # 0x80000000(hex)
-addi $15, $14, 2147483648    # two 0x80000000(hex) add
-add $16, $14, $14
-add $17, $0, 4294967294
-add $18, $0, 2147483647
-sub $19, $17, $18     # 0xFFFFFFFE - 0x7FFFFFFF
+
+
+addi $1, $0, 65535      # r1 = 65535 = 0x0000FFFF
+sll $2, $1, 16			# r2 = r1 << 16 = 0xFFFF0000
+addi $3, $0, 8      #  8 = 0x00001000
+sll $4, $3, 16			# << 16 = 0x10000000
+addi $5, $2, $4	#ovf
+
+sll $6, $1, 15	# 0x7FFF8000
+addi $6, $6, 36727	# +0x7FFF
+addi $7, $2, 65534	#+0xFFFE
+sub $8, $7, $6    # 0xFFFFFFFE - 0x7FFFFFFF
