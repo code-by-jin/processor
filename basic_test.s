@@ -19,3 +19,9 @@ sw $11, 2($0)		# store 567 into address 2
 lw $12, 1($0)		# load 345 into r12
 lw $13, 2($0)		# load 567 into r13
  
+addi $14, $0, 2147483648     # 0x80000000(hex)
+addi $15, $14, 2147483648    # two 0x80000000(hex) add
+add $16, $14, $14
+add $17, $0, 4294967294
+add $18, $0, 2147483647
+sub $19, $17, $18     # 0xFFFFFFFE - 0x7FFFFFFF
