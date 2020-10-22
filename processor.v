@@ -47,6 +47,7 @@
  * Outputs: 32-bit data at the given address
  *
  */
+
 module processor(
     // Control signals
     clock,                          // I: The master clock
@@ -90,11 +91,10 @@ module processor(
     output [31:0] data_writeReg;
     input [31:0] data_readRegA, data_readRegB;
 
-    /* YOUR CODE STARTS HERE */
-	/*random logic: control signals*/
+   /* YOUR CODE STARTS HERE */
 	wire [31:0] pc, pc_next;
-	wire is_alu, is_addi, is_sw, is_lw;
-	wire DMwe, Rwe, Rwd, Rdst, ALUinB;	
+	wire is_alu, is_addi, is_sw, is_lw, is_ovf;
+	wire DMwe, Rwe, Rwd, Rdst, ALUinB;
 	wire [4:0] rd, rs, rt, shamt, ALU_op;
 	wire [31:0] data_operandB, sx_immed, data_result;
 	wire isNotEqual, isLessThan, overflow, isNotEqual_pc, isLessThan_pc, overflow_pc;
@@ -107,15 +107,20 @@ module processor(
 	
 	//Instruction Decode
 	decode_op_code decode_op (is_alu, is_addi, is_sw, is_lw, DMwe, Rwe, Rwd, ALUinB, q_imem[31:27]);
-	
-	assign ALU_op = is_alu ? q_imem[6:2] : 5'd0;   // alu if 1
-	
-	assign shamt  = is_alu ? q_imem[11:7] : 5'd0;  // alu if 1
  	
-	// assign rt = is_alu ? q_imem[16:12] : 5'd0;
+	// devide instruction
 	assign rt = q_imem[16:12];
 	assign rs = q_imem[21:17];
 	assign rd = q_imem[26:22];
+	assign ALU_op = is_alu ? q_imem[6:2] : 5'd0;   // alu if 1
+	assign shamt  = is_alu ? q_imem[11:7] : 5'd0;  // alu if 1
+	
+	//Determine $rstatus value
+	assign is_add = is_alu & (~ALU_op[4]) & (~ALU_op[3]) & (~ALU_op[2]) & (~ALU_op[1]) & (~ALU_op[0]); // 00000
+	assign is_sub = is_alu & (~ALU_op[4]) & (~ALU_op[3]) & (~ALU_op[2]) & (~ALU_op[1]) & (ALU_op[0]); // 00001
+	assign is_ovf = (is_add | is_addi | is_sub) & overflow;
+	assign ovf_label = is_ovf ? (is_add? 32'd1 : (is_addi? 32'd2 : 32'd3)): 32'd0; // add->1; addi->2; sub->3
+
 	
 	//Operand Fetch
 	/*SX: sign extesion part*/
@@ -127,11 +132,6 @@ module processor(
 	assign data_operandB = ALUinB ? sx_immed: data_readRegB;		// mux to choose add operand	
 	alu alu_op (data_readRegA, data_operandB, ALU_op, shamt, data_result, isNotEqual, isLessThan, overflow);
 	
-	//Determine $rstatus value
-	assign is_add = is_alu & (~ALU_op[4]) & (~ALU_op[3]) & (~ALU_op[2]) & (~ALU_op[1]) & (~ALU_op[0]); // 00000
-	assign is_sub = is_alu & (~ALU_op[4]) & (~ALU_op[3]) & (~ALU_op[2]) & (~ALU_op[1]) & (ALU_op[0]); // 00001
-	assign ovf_label = overflow ? (is_add? 32'd1 : (is_addi? 32'd2 : 32'd3)) : 32'd0; // add->1; addi->2; sub->3
-
 	
 	// Result Store
 	/*dmem*/
@@ -144,10 +144,12 @@ module processor(
 	assign ctrl_writeEnable = Rwe; //output
 	assign ctrl_readRegA = rs; //output
 	assign ctrl_readRegB = DMwe ? rd : rt; //output	
-	assign ctrl_writeReg = overflow? 5'd30 : rd; //output
+	assign ctrl_writeReg = is_ovf ? 5'd30 : rd; //output
+	//assign ctrl_writeReg = rd;
 	
 	//output, if Rwd(is_lw): q_dmem; else: data_result(alu_output)
-	assign data_writeReg = overflow? ovf_label : (Rwd ? q_dmem : data_result); 
+	assign data_writeReg = is_ovf  ? ovf_label : (Rwd ? q_dmem : data_result); 
+	//assign data_writeReg = Rwd ? q_dmem : data_result; 
 	
 	//Next Instruction
 	alu (pc, 32'd1, 5'd0, 5'd0, pc_next, isNotEqual_pc, isLessThan_pc, overflow_pc); // pc -> pc_next
