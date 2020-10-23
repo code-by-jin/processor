@@ -9,9 +9,9 @@ Our design is shown in the Figure above with the reference of slide 14 in Lectur
 As shown in the table below. Given the skeleton clock as clk, IMem and DMem will use clk as clock; PC and Register will divide the clk by four as their own clock.
 | Component | Clock   |
 | -------------  |:-------------:|
-| PC           | clk/4 |
+| PC           | ~clk/4 |
 | IMem         | clk       |
-| Register            | clk/4     |
+| Register            | ~clk/4     |
 | DMem            | clk  |
 
 ### Instruction Decode
