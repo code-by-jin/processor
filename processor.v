@@ -115,12 +115,6 @@ module processor(
 	assign ALU_op = is_alu ? q_imem[6:2] : 5'd0;   // alu if 1
 	assign shamt  = is_alu ? q_imem[11:7] : 5'd0;  // alu if 1
 	
-	//Determine $rstatus value
-	assign is_add = is_alu & (~ALU_op[4]) & (~ALU_op[3]) & (~ALU_op[2]) & (~ALU_op[1]) & (~ALU_op[0]); // 00000
-	assign is_sub = is_alu & (~ALU_op[4]) & (~ALU_op[3]) & (~ALU_op[2]) & (~ALU_op[1]) & (ALU_op[0]); // 00001
-	assign is_ovf = (is_add | is_addi | is_sub) & overflow;
-	assign ovf_label = is_ovf ? (is_add? 32'd1 : (is_addi? 32'd2 : 32'd3)): 32'd0; // add->1; addi->2; sub->3
-
 	
 	//Operand Fetch
 	/*SX: sign extesion part*/
@@ -132,6 +126,11 @@ module processor(
 	assign data_operandB = ALUinB ? sx_immed: data_readRegB;		// mux to choose add operand	
 	alu alu_op (data_readRegA, data_operandB, ALU_op, shamt, data_result, isNotEqual, isLessThan, overflow);
 	
+	//Determine $rstatus value
+	assign is_add = is_alu & (~ALU_op[4]) & (~ALU_op[3]) & (~ALU_op[2]) & (~ALU_op[1]) & (~ALU_op[0]); // 00000
+	assign is_sub = is_alu & (~ALU_op[4]) & (~ALU_op[3]) & (~ALU_op[2]) & (~ALU_op[1]) & (ALU_op[0]); // 00001
+	assign is_ovf = (is_add | is_addi | is_sub) & overflow;
+	assign ovf_label = is_ovf ? (is_add? 32'd1 : (is_addi? 32'd2 : 32'd3)): 32'd0; // add->1; addi->2; sub->3
 	
 	// Result Store
 	/*dmem*/
