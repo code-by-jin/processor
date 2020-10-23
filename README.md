@@ -1,7 +1,7 @@
 # Processor Checkpoint 1 -- R-type and I-type
 ### Team members: Wenxin Xu and Jin Zhou
 
-![alt text](processor_design.png)
+<img src="processor_design.png" alt="drawing" width="800"/>
 
 Our design is shown in the Figure above with the reference of slide 14 in Lecture 8.
 
