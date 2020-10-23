@@ -9,13 +9,7 @@
  * inspect which signals the processor tries to assert when.
  */
 
-module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock,
-address_imem, q_imem, address_dmem, data, wren, q_dmem, ctrl_writeEnable, ctrl_writeReg,
-ctrl_readRegA, ctrl_readRegB, data_writeReg, data_readRegA, data_readRegB,
-//modified
-reg1, reg2, reg3, reg4, reg6, reg7, reg9,
-
-);
+module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock);
     input clock, reset;
     /* 
         Create four clocks for each module from the original input "clock".
@@ -26,11 +20,9 @@ reg1, reg2, reg3, reg4, reg6, reg7, reg9,
     */
     output imem_clock, dmem_clock, processor_clock, regfile_clock;
 
-	 
-	 /*Test*/
-	 
+	 	 
 	 wire clk_div_by_2, clk_div_by_4;
-	 
+
 	 
 	 clk_div_2 div_2 (clk_div_by_2, clock, reset);
 	 clk_div_2 div_4 (clk_div_by_4, clk_div_by_2, reset);
@@ -44,8 +36,8 @@ reg1, reg2, reg3, reg4, reg6, reg7, reg9,
     /** IMEM **/
     // Figure out how to generate a Quartus syncram component and commit the generated verilog file.
     // Make sure you configure it correctly!
-    output wire [11:0] address_imem;
-    output wire [31:0] q_imem;
+    wire [11:0] address_imem;
+    wire [31:0] q_imem;
     imem my_imem(
         .address    (address_imem),            // address of data
         .clock      (imem_clock),                  // you may need to invert the clock
@@ -55,10 +47,10 @@ reg1, reg2, reg3, reg4, reg6, reg7, reg9,
     /** DMEM **/
     // Figure out how to generate a Quartus syncram component and commit the generated verilog file.
     // Make sure you configure it correctly!
-    output wire [11:0] address_dmem;
-    output wire [31:0] data;
-    output wire wren;
-    output wire [31:0] q_dmem;
+    wire [11:0] address_dmem;
+    wire [31:0] data;
+    wire wren;
+    wire [31:0] q_dmem;
     dmem my_dmem(
         .address    (address_dmem),       // address of data
         .clock      (dmem_clock),                  // may need to invert the clock
@@ -69,11 +61,10 @@ reg1, reg2, reg3, reg4, reg6, reg7, reg9,
 
     /** REGFILE **/
     // Instantiate your regfile
-    output wire ctrl_writeEnable;
-    output wire [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
-    output wire [31:0] data_writeReg;
-    output wire [31:0] data_readRegA, data_readRegB;
-	 output wire[31:0] reg1, reg2, reg3, reg4, reg6, reg7, reg9;
+    wire ctrl_writeEnable;
+    wire [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
+    wire [31:0] data_writeReg;
+    wire [31:0] data_readRegA, data_readRegB;
 	 
     regfile my_regfile(
         regfile_clock,
@@ -84,8 +75,7 @@ reg1, reg2, reg3, reg4, reg6, reg7, reg9,
         ctrl_readRegB,
         data_writeReg,
         data_readRegA,
-        data_readRegB,
-		  reg1, reg2, reg3, reg4, reg6, reg7, reg9
+        data_readRegB
     );
 
     /** PROCESSOR **/
