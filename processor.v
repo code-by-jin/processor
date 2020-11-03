@@ -94,7 +94,7 @@ module processor(
    /* YOUR CODE STARTS HERE */
 	wire [31:0] pc, pc_next;
 	wire is_alu, is_addi, is_sw, is_lw, is_ovf;
-	wire DMwe, Rwe, Rwd, Rdst, ALUinB;
+	wire DMwe, Rwe, Rwd, Rdst, ALUinB, BR, JP;
 	wire [4:0] rd, rs, rt, shamt, ALU_op;
 	wire [31:0] data_operandB, sx_immed, data_result, ovf_label;
 	wire isNotEqual, isLessThan, overflow, isNotEqual_pc, isLessThan_pc, overflow_pc;
@@ -106,7 +106,7 @@ module processor(
 	assign address_imem = pc[11:0];  //output
 	
 	//Instruction Decode
-	decode_op_code decode_op (is_alu, is_addi, is_sw, is_lw, DMwe, Rwe, Rwd, ALUinB, q_imem[31:27]);
+	decode_op_code decode_op (is_alu, is_addi, is_sw, is_lw, DMwe, Rwe, Rwd, ALUinB, BR, JP, q_imem[31:27]);
  	
 	// devide instruction
 	assign rt = q_imem[16:12];
