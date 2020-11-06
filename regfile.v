@@ -10,11 +10,12 @@ module regfile(
 
 	reg[31:0] registers[31:0];
 	
+	integer i;
 	always @(posedge clock or posedge ctrl_reset)
 	begin
 		if(ctrl_reset)
 			begin
-				integer i;
+				
 				for(i = 0; i < 32; i = i + 1)
 					begin
 						registers[i] = 32'd0;
@@ -28,33 +29,5 @@ module regfile(
 	assign data_readRegA = registers[ctrl_readRegA];
 	assign data_readRegB = registers[ctrl_readRegB];
 	
-/*	
-	output [31:0] reg1, reg2, reg3, reg4, reg6, reg7, reg9;
-
-	
-	assign reg1[31:0] = registers[1][31:0];
-	assign reg2[31:0] = registers[2][31:0];
-	assign reg3[31:0] = registers[3][31:0];
-	assign reg4[31:0] = registers[4][31:0];
-	assign reg6[31:0] = registers[6][31:0];
-	assign reg7[31:0] = registers[7][31:0];
-	assign reg9[31:0] = registers[9][31:0];
-	assign reg10[31:0] = registers[10][31:0];
-	assign reg12[31:0] = registers[12][31:0];
-	
-	assign reg20[31:0] = registers[20][31:0];
-	assign reg21[31:0] = registers[21][31:0];	
-	assign reg22[31:0] = registers[22][31:0];
-	assign reg23[31:0] = registers[23][31:0];
-	assign reg24[31:0] = registers[24][31:0];
-	assign reg25[31:0] = registers[25][31:0];
-	assign reg26[31:0] = registers[26][31:0];
-	
-	assign reg19[31:0] = registers[19][31:0];
-	assign reg27[31:0] = registers[27][31:0];	
-	assign reg28[31:0] = registers[28][31:0];
-	assign reg29[31:0] = registers[29][31:0];
-	assign reg30[31:0] = registers[30][31:0];
-	assign reg31[31:0] = registers[31][31:0];*/
 	
 endmodule

@@ -127,9 +127,8 @@ module processor(
 
 	// Execute
 	/*alu*/
-	assign data_operandA = data_readRegA;
 	assign data_operandB = is_addi | is_sw | is_lw ? sx_immed_N: data_readRegB;		// mux to choose add operand	
-	alu alu_op (data_operandA, data_operandB, ALU_op, shamt, data_result, isNotEqual, isLessThan, overflow);
+	alu alu_op (data_readRegA, data_operandB, ALU_op, shamt, data_result, isNotEqual, isLessThan, overflow);
 	
 	//Determine $rstatus value
 	assign is_add = is_alu & (~ALU_op[4]) & (~ALU_op[3]) & (~ALU_op[2]) & (~ALU_op[1]) & (~ALU_op[0]); // 00000
@@ -147,9 +146,9 @@ module processor(
 			
 /*	/*Regfile*/
 	assign ctrl_writeEnable = is_alu | is_addi | is_lw | is_jal | is_setx;
-// A,B : bne:rd,rs	blt:rd,rs	sw:rd:rs		jr:rd,	add/sub/and/or:rs,rt		bex:30,0
-	assign ctrl_readRegA = is_bex ? 32'd30 : (is_bne | is_blt | is_sw | is_jr ? rd : rs);
-	assign ctrl_readRegB = is_bex ? 32'd0 : (is_bne | is_blt | is_sw ? rs : rt);
+// A,B : bne:rd,rs	blt:rd,rs	sw:rd,rs		jr:rd,	add/sub/and/or:rs,rt		bex:30,0
+	assign ctrl_readRegA = is_bex ? 5'd30 : (is_jr ? rd : rs);
+	assign ctrl_readRegB = is_bex ? 5'd0 : (is_bne | is_blt | is_sw ? rd : rt);
 	assign ctrl_writeReg = is_jal ? 5'd31 : (is_ovf | is_setx ? 5'd30 : rd);
 	
 	//if jal, $r31 = PC + 1; if setx, $rstatus = T; if ovf, $rstatus = ovf_label; if sw, $rd = q_dmem; else: data_result
@@ -161,7 +160,7 @@ module processor(
 	// if is_j | is_jal | is_bex: pc_next = T; elif is_bne | is_blt: pc_next = pc + 1 + n; else: pc_next = pc + 1
 	
 	assign ctrl_pc_T = is_j | is_jal | (is_bex & isNotEqual);
-	assign ctrl_pc_N_1 = (is_bne & isNotEqual)| (is_blt & isLessThan);
+	assign ctrl_pc_N_1 = (is_bne & isNotEqual)| (is_blt & ~isLessThan & isNotEqual);
 	
 	assign pc_next = is_jr ? data_readRegA : (ctrl_pc_T ? sx_immed_T : (ctrl_pc_N_1 ? pc + sx_immed_N + 32'd1 : pc + 32'd1) );
 	//alu (pc, 32'd1, 5'd0, 5'd0, pc_next, isNotEqual_pc, isLessThan_pc, overflow_pc); // pc -> pc_next

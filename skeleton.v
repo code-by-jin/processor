@@ -10,7 +10,8 @@
  */
 
 module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock);
-    input clock, reset;
+
+	input clock, reset;
     /* 
         Create four clocks for each module from the original input "clock".
         These four outputs will be used to run the clocked elements of your processor on the grading side. 
@@ -19,7 +20,6 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
         based on proper functioning with this clock.
     */
     output imem_clock, dmem_clock, processor_clock, regfile_clock;
-
 	 	 
 	 wire clk_div_by_2, clk_div_by_4;
 
@@ -76,7 +76,7 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
         data_writeReg,
         data_readRegA,
         data_readRegB
-    );
+	 );
 
     /** PROCESSOR **/
     processor my_processor(
