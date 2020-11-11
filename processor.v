@@ -92,8 +92,8 @@ module processor(
     input [31:0] data_readRegA, data_readRegB;
 
     /* YOUR CODE STARTS HERE */
-	 wire [31:0] pc, pc_next, sx_immed_N, sx_immed_T, data_result, ovf_label;
-	 wire is_alu, is_addi, is_sw, is_lw, is_ovf, data_operandB, 
+	wire [31:0] pc, pc_next, sx_immed_N, sx_immed_T, data_result, ovf_label, data_operandB;
+	 wire is_alu, is_addi, is_sw, is_lw, is_ovf, 
 	      isNotEqual, isLessThan, overflow, isNotEqual_pc, isLessThan_pc, overflow_pc, ctrl_pc_T, ctrl_pc_N_1;
 	 wire [4:0] Opcode, rd, rs, rt, shamt, ALU_op;
 	
