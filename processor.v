@@ -91,78 +91,75 @@ module processor(
     output [31:0] data_writeReg;
     input [31:0] data_readRegA, data_readRegB;
 
-   /* YOUR CODE STARTS HERE */
-	wire [31:0] pc, pc_next;
-	wire is_alu, is_addi, is_sw, is_lw, is_ovf;
-	wire [4:0] rd, rs, rt, shamt, ALU_op;
-	wire [31:0] data_operandB, sx_immed_N, sx_immed_T, data_result, ovf_label, rstatus_val;
-	wire isNotEqual, isLessThan, overflow, isNotEqual_pc, isLessThan_pc, overflow_pc, ctrl_pc_T, ctrl_pc_N_1;
+    /* YOUR CODE STARTS HERE */
+	 wire [31:0] pc, pc_next, sx_immed_N, sx_immed_T, data_result, ovf_label;
+	 wire is_alu, is_addi, is_sw, is_lw, is_ovf, data_operandB, 
+	      isNotEqual, isLessThan, overflow, isNotEqual_pc, isLessThan_pc, overflow_pc, ctrl_pc_T, ctrl_pc_N_1;
+	 wire [4:0] Opcode, rd, rs, rt, shamt, ALU_op;
 	
-	//Instruction Fetch
-	register_32bits pc_fetch (pc, pc_next, clock, 1'b1, reset); //reg pc: pc_next -> pc
+	 //Instruction Fetch
+	 register pc_fetch (pc, pc_next, clock, 1'b1, reset); //pc_next -> pc
+	 /*imem*/
+	 assign address_imem = pc[11:0];  // where to read instruction code
 	
-	/*imem*/
-	assign address_imem = pc[11:0];  //output
+	 //Instruction Decode
+	 assign Opcode = q_imem[31:27];
+	 assign rd = q_imem[26:22];
+	 assign rs = q_imem[21:17];
+	 assign rt = q_imem[16:12];
 	
-	//Instruction Decode
-	decode_op_code decode_op (is_alu, is_addi, is_sw, is_lw, is_j, is_bne, is_jal, is_jr, is_blt, is_bex, is_setx, q_imem[31:27]);
- 	
-	// devide instruction
-	assign rt = q_imem[16:12];
-	assign rs = q_imem[21:17];
-	assign rd = q_imem[26:22];
+	 assign is_alu  = ~Opcode[4] & ~Opcode[3] & ~Opcode[2] & ~Opcode[1] & ~Opcode[0]; //00000
+	 assign is_addi = ~Opcode[4] & ~Opcode[3] & Opcode[2]  & ~Opcode[1] & Opcode[0];  //00101
+	 assign is_sw   = ~Opcode[4] & ~Opcode[3] & Opcode[2]  & Opcode[1]  & Opcode[0];  //00111
+	 assign is_lw   = ~Opcode[4] & Opcode[3]  & ~Opcode[2] & ~Opcode[1] & ~Opcode[0]; //01000
+	 assign is_j    = ~Opcode[4] & ~Opcode[3] & ~Opcode[2] & ~Opcode[1] & Opcode[0];  //00001
+	 assign is_bne  = ~Opcode[4] & ~Opcode[3] & ~Opcode[2] & Opcode[1]  & ~Opcode[0]; //00010
+	 assign is_jal  = ~Opcode[4] & ~Opcode[3] & ~Opcode[2] & Opcode[1]  & Opcode[0];	 //00011
+	 assign is_jr   = ~Opcode[4] & ~Opcode[3] & Opcode[2]  & ~Opcode[1] & ~Opcode[0]; //00100
+	 assign is_blt  = ~Opcode[4] & ~Opcode[3] & Opcode[2]  & Opcode[1]  & ~Opcode[0]; //00110
+	 assign is_bex  = Opcode[4]  & ~Opcode[3] & Opcode[2]  & Opcode[1]  & ~Opcode[0]; //10110
+	 assign is_setx = Opcode[4]  & ~Opcode[3] & Opcode[2]  & ~Opcode[1] & Opcode[0];	 //10101
+	 
+	 assign ALU_op = is_alu? q_imem[6:2] : 5'd0;   // alu if 1
+	 assign shamt  = is_alu? q_imem[11:7] : 5'd0;  // alu if 1
+	 
+	 assign is_add = is_alu & ~ALU_op[4] & ~ALU_op[3] & ~ALU_op[2] & ~ALU_op[1] & ~ALU_op[0]; // 00000
+	 assign is_sub = is_alu & ~ALU_op[4] & ~ALU_op[3] & ~ALU_op[2] & ~ALU_op[1] & ALU_op[0];  // 00001
+	 
+	 //Operand Fetch
+	 /*SX: sign extesion part*/
+	 assign sx_immed_N[31:16] = q_imem[16] ? 16'hFFFF:16'h0000;
+	 assign sx_immed_N[15:0] = q_imem[15:0]; 
 	
-	assign ALU_op = is_alu ? q_imem[6:2] : 5'd0;   // alu if 1
-	assign shamt  = is_alu ? q_imem[11:7] : 5'd0;  // alu if 1
-	
-	
-	//Operand Fetch
-	/*SX: sign extesion part*/
-	assign sx_immed_N[31:16] = q_imem[16] ? 16'hFFFF:16'h0000;
-	assign sx_immed_N[15:0] = q_imem[15:0]; 
-	
-	assign sx_immed_T[31:27] = 5'd0;
-	assign sx_immed_T[26:0] = q_imem[26:0]; 
-	
+	 assign sx_immed_T[31:27] = 5'd0;
+	 assign sx_immed_T[26:0] = q_imem[26:0]; 
 
-	// Execute
-	/*alu*/
-	assign data_operandB = is_addi | is_sw | is_lw ? sx_immed_N: data_readRegB;		// mux to choose add operand	
-	alu alu_op (data_readRegA, data_operandB, ALU_op, shamt, data_result, isNotEqual, isLessThan, overflow);
+	 // Execute
+	 /*alu*/
+	 assign data_operandB = is_addi | is_sw | is_lw? sx_immed_N: data_readRegB;		// mux to choose add operand	
+	 alu alu_op (data_readRegA, data_operandB, ALU_op, shamt, data_result, isNotEqual, isLessThan, overflow);
 	
-	//Determine $rstatus value
-	assign is_add = is_alu & (~ALU_op[4]) & (~ALU_op[3]) & (~ALU_op[2]) & (~ALU_op[1]) & (~ALU_op[0]); // 00000
-	assign is_sub = is_alu & (~ALU_op[4]) & (~ALU_op[3]) & (~ALU_op[2]) & (~ALU_op[1]) & (ALU_op[0]); // 00001
-	assign is_ovf = (is_add | is_addi | is_sub) & overflow;
-	assign ovf_label = is_ovf ? (is_add? 32'd1 : (is_addi? 32'd2 : 32'd3)): 32'd0; // add->1; addi->2; sub->3
+	 assign is_ovf = (is_add | is_addi | is_sub) & overflow; // conrto signal for overflow
+	 assign ovf_label = is_ovf? (is_add? 32'd1 : (is_addi? 32'd2 : 32'd3)): 32'd0; // what to write add: 1; addi: 2; sub:3
 	
-	
-	// Result Store
-	/*dmem*/
-	assign address_dmem = data_result[11:0];	//dataresult(address) output to dmem
-	assign data = data_readRegB; // output
-	
-	assign wren = is_sw; // output, when is_sw
+	 // Result Store
+	 /*dmem*/
+	 assign address_dmem = data_result[11:0];	// where to write
+	 assign data = data_readRegB; // what to write
+	 assign wren = is_sw; // control signal for write to data memory
 			
-/*	/*Regfile*/
-	assign ctrl_writeEnable = is_alu | is_addi | is_lw | is_jal | is_setx;
-// A,B : bne:rd,rs	blt:rd,rs	sw:rd,rs		jr:rd,	add/sub/and/or:rs,rt		bex:30,0
-	assign ctrl_readRegA = is_bex ? 5'd30 : (is_jr ? rd : rs);
-	assign ctrl_readRegB = is_bex ? 5'd0 : (is_bne | is_blt | is_sw ? rd : rt);
-	assign ctrl_writeReg = is_jal ? 5'd31 : (is_ovf | is_setx ? 5'd30 : rd);
+    /*Regfile*/
+	 assign ctrl_writeEnable = is_alu | is_addi | is_lw | is_jal | is_setx; // control signal for write to regs.
+	 assign ctrl_readRegA = is_bex? 5'd30 : (is_jr? rd : rs); // where to read A? bex: rstatus; jr: rd; else: rs
+	 assign ctrl_readRegB = is_bex? 5'd0 : (is_bne | is_blt | is_sw ? rd : rt); //where read B? bex: 0; bne | blt | sw: rd; else: rt
+	 assign ctrl_writeReg = is_jal? 5'd31 : (is_ovf | is_setx? 5'd30 : rd); //where to write? jal: r31; setx | ovf: rstatus; else: rd
 	
-	//if jal, $r31 = PC + 1; if setx, $rstatus = T; if ovf, $rstatus = ovf_label; if sw, $rd = q_dmem; else: data_result
-	assign data_writeReg = is_jal ? pc + 32'd1 : (is_setx ? sx_immed_T : (is_ovf ? ovf_label : (is_lw ? q_dmem : data_result)) );//output
+	 // what to write: jal: PC + 1; setx: T; ovf: ovf_label; lw: q_dmem; else: data_result
+	 assign data_writeReg = is_jal? pc+32'd1 : (is_setx? sx_immed_T : (is_ovf? ovf_label : (is_lw? q_dmem : data_result)));
 	
-	
-	//Next Instruction
-	
-	// if is_j | is_jal | is_bex: pc_next = T; elif is_bne | is_blt: pc_next = pc + 1 + n; else: pc_next = pc + 1
-	
-	assign ctrl_pc_T = is_j | is_jal | (is_bex & isNotEqual);
-	assign ctrl_pc_N_1 = (is_bne & isNotEqual)| (is_blt & ~isLessThan & isNotEqual);
-	
-	assign pc_next = is_jr ? data_readRegA : (ctrl_pc_T ? sx_immed_T : (ctrl_pc_N_1 ? pc + sx_immed_N + 32'd1 : pc + 32'd1) );
-	//alu (pc, 32'd1, 5'd0, 5'd0, pc_next, isNotEqual_pc, isLessThan_pc, overflow_pc); // pc -> pc_next
+	 //Next Instruction
+	 assign ctrl_pc_T = is_j | is_jal | (is_bex & isNotEqual); // contro signal for PC = T
+	 assign ctrl_pc_N_1 = (is_bne & isNotEqual)| (is_blt & ~isLessThan & isNotEqual); // contro signal for PC = PC+N+1
+	 assign pc_next = is_jr? data_readRegA : (ctrl_pc_T? sx_immed_T : (ctrl_pc_N_1? pc+sx_immed_N+32'd1 : pc+32'd1));//pc -> pc-next
 	
 endmodule

@@ -29,5 +29,5 @@ module regfile(
 	assign data_readRegA = registers[ctrl_readRegA];
 	assign data_readRegB = registers[ctrl_readRegB];
 	
-	
+
 endmodule
