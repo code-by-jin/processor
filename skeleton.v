@@ -30,7 +30,7 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
 	 
 	 assign imem_clock = clock;
 	 assign dmem_clock =  clock;
-	 assign regfile_clock = ~clk_div_by_4;
+	 assign regfile_clock = ~clk_div_by_2;
 	 assign processor_clock = ~clk_div_by_4;
 	 
     /** IMEM **/
