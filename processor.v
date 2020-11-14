@@ -71,7 +71,8 @@ module processor(
     data_writeReg,                  // O: Data to write to for regfile
     data_readRegA,                  // I: Data from port A of regfile
     data_readRegB                   // I: Data from port B of regfile
-);
+	 );
+
     // Control signals
     input clock, reset;
 
@@ -92,8 +93,8 @@ module processor(
     input [31:0] data_readRegA, data_readRegB;
 
     /* YOUR CODE STARTS HERE */
-	wire [31:0] pc, pc_next, sx_immed_N, sx_immed_T, data_result, ovf_label, data_operandB;
-	 wire is_alu, is_addi, is_sw, is_lw, is_ovf, 
+	 wire [31:0] pc, pc_next, sx_immed_N, sx_immed_T, data_result, data_operandB, ovf_label;
+	 wire is_alu, is_addi, is_sw, is_lw, is_j, is_bne, is_jal, is_jr, is_blt, is_bex, is_setx, is_ovf,
 	      isNotEqual, isLessThan, overflow, isNotEqual_pc, isLessThan_pc, overflow_pc, ctrl_pc_T, ctrl_pc_N_1;
 	 wire [4:0] Opcode, rd, rs, rt, shamt, ALU_op;
 	
@@ -136,7 +137,7 @@ module processor(
 
 	 // Execute
 	 /*alu*/
-	 assign data_operandB = is_addi | is_sw | is_lw? sx_immed_N: data_readRegB;		// mux to choose add operand	
+	 assign data_operandB = (is_addi | is_sw | is_lw)? sx_immed_N: data_readRegB;		// mux to choose add operand	
 	 alu alu_op (data_readRegA, data_operandB, ALU_op, shamt, data_result, isNotEqual, isLessThan, overflow);
 	
 	 assign is_ovf = (is_add | is_addi | is_sub) & overflow; // conrto signal for overflow

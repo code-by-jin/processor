@@ -3,6 +3,7 @@ module regfile(
 	ctrl_readRegA, ctrl_readRegB, data_writeReg, data_readRegA,
 	data_readRegB
 );
+
 	input clock, ctrl_writeEnable, ctrl_reset;
 	input [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
 	input [31:0] data_writeReg;
@@ -29,5 +30,5 @@ module regfile(
 	assign data_readRegA = registers[ctrl_readRegA];
 	assign data_readRegB = registers[ctrl_readRegB];
 	
-
+	
 endmodule

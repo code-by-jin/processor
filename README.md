@@ -1,5 +1,7 @@
 # Processor Checkpoint 2 -- The Fully Functional Processor
-### Team members: Wenxin Xu and Jin Zhou
+### Team members: Wenxin Xu (wx65) and Jin Zhou (jz230)
+
+Our testing is based on the Waveform. 
 
 Our design is based on the reference of slide 14 in Lecture 8.
 
@@ -21,3 +23,6 @@ With q_imem as input, decoding can be expressed as steps below:
 
 ### Overflow Control
 Here, we treat overflow as an exception. Overflow Label which indicate what operation causes overflow will be writtend into `$30`. Exceptions writing takes precedent in our design.
+
+### PC design
+We use muxes to select the next pc. A few options include `T`, `PC + 1` and `PC + N + 1`, details are in the `processor.v`. 
