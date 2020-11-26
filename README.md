@@ -1,9 +1,4 @@
-# Processor Checkpoint 2 -- The Fully Functional Processor
-### Team members: Wenxin Xu (wx65) and Jin Zhou (jz230)
-
-Our testing is based on the Waveform. 
-
-Our design is based on the reference of slide 14 in Lecture 8.
+# A Fully Functional Processor
 
 ### Clock Design
 As shown in the table below. Given the skeleton clock as clk, IMem and DMem will use clk as clock; PC and Register will divide the clk by four as their own clock.
